@@ -63,4 +63,4 @@ jobs:
         with:
           app-name: 'CardScanAnalytics'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E6B12134B3EC41E082BB37D0D5F8EB40 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F618B171CFB34A31BB6404EDDC495BFD }}
