@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import easyocr
 import cv2
 import fitz  # PyMuPDF for handling PDFs
-from openai import AzureOpenAI
+from openai import AzureOpenAI #importing
 import os
 import io
 from PIL import Image
@@ -271,3 +271,4 @@ def upload_file():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
