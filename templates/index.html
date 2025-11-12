@@ -1,218 +1,1002 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Card Details Extractor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .container {
-      background-color: #fff;
-      width: 100%;
-      max-width: 450px;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      position: relative;
-    }
-    h2 {
-      font-size: 28px;
-      color: #333;
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
-    .file-upload {
-      position: relative;
-      margin-bottom: 20px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      padding: 12px;
-      background-color: #f9f9f9;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: box-shadow 0.3s ease;
-    }
-    .file-upload input[type="file"] {
-      display: none;
-    }
-    .file-upload label {
-      font-size: 16px;
-      color: #333;
-      cursor: pointer;
-      flex: 1;
-      text-align: left;
-    }
-    .file-upload button {
-      background-color: #ff7f50;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .file-upload button:hover {
-      background-color: #ff6f33;
-    }
-    .file-upload:hover {
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-    .button {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #ff7f50 0%, #ff6f33 100%);
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-    .button:hover {
-      background-color: #ff6f33;
-      transform: scale(1.05);
-    }
-    /* Adjusted Styles for Card Details */
-    .details {
-  margin-top: 30px;
-  background-color: #f3f3f3;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Ensure content starts from the top */
-  text-align: left;
-  overflow-y: auto; /* Enable scrolling */
-  max-height: 200px; /* Set max height to allow scrolling */
-  word-wrap: break-word;
-  padding-top: 10px; /* Optional: Add a little space above the content */
-  padding-bottom: 10px; /* Optional: Add some space below the content */
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Data Extraction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-h3 {
-  font-size: 24px;
-  color: #333;
-  font-weight: 600;
-  text-align: left; /* Ensure heading is left-aligned */
-  width: 100%;
-  margin-bottom: 0; /* Remove bottom margin */
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
 
-#responseText {
-  font-size: 16px;
-  color: #333;
-  margin-top: 5px; /* Reduced margin to make text closer */
-  white-space: pre-wrap; /* Ensure response wraps correctly */
-  margin-bottom: 0; /* Remove any bottom margin */
-}
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            margin: 20px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
+        .header h1 {
+            font-size: 24px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
 
-    .footer {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-      font-size: 14px;
-      color: #999;
-    }
+        .refresh-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    /* New Styles for Fetching Message */
-    .fetching-message {
-      font-size: 18px;
-      color: #ff7f50;
-      font-weight: 600;
-      margin-top: 20px;
-    }
+        .refresh-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
 
-  </style>
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            min-height: calc(100vh - 120px);
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e74c3c;
+        }
+
+        .panel-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* Auto-detection display */
+        .detected-type {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .detected-type h3 {
+            color: #2e7d32;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        .detected-type p {
+            color: #388e3c;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .auto-process-indicator {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            color: #856404;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* Camera Section */
+        .camera-viewport {
+            width: 100%;
+            height: 240px;
+            background: #000;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        #video, #capturedImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        #capturedImage {
+            display: none;
+        }
+
+        .camera-status {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: capitalize;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #229954;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #7f8c8d;
+            transform: translateY(-1px);
+        }
+
+        .action-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Upload Section */
+        .upload-zone {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: #3498db;
+            background: #ebf8ff;
+        }
+
+        .upload-zone.active {
+            border-color: #3498db;
+            background: #ebf8ff;
+            border-style: solid;
+        }
+
+        .upload-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 12px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-selected {
+            margin-top: 12px;
+            padding: 10px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            color: #155724;
+            font-size: 12px;
+        }
+
+        .process-button {
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .process-button:hover:not(:disabled) {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .process-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Details Form */
+        .details-form {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: border-color 0.2s ease;
+            background: white;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 60px;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            grid-column: 1 / -1;
+        }
+
+        .results-content {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #27ae60;
+        }
+
+        #extractedData {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 14px;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .results-panel {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 0 16px 16px;
+            }
+            
+            .camera-controls {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                min-width: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-
-  <div class="container">
-    <h2>Upload Your Card</h2>
-
-    <div class="file-upload">
-      <label for="cardImage">Choose a file</label>
-      <input type="file" id="cardImage" accept="image/*" onchange="updateFileName()" />
-      <button onclick="document.getElementById('cardImage').click()">Upload</button>
+    <div class="header">
+        <h1>Card Data Extraction System</h1>
+        <button class="refresh-btn" id="refreshBtn">
+            <span class="refresh-icon">🔄</span>
+            Refresh
+        </button>
     </div>
 
-    <button class="button" id="actionButton" onclick="uploadImage()">Get Details</button>
+    <div class="main-container">
+        <!-- Camera Panel -->
+        <div class="panel">
+            <div class="panel-header">Camera Capture</div>
+            <div class="panel-subtitle">Capture document and auto-detect type.</div>
+            
+            <div class="camera-viewport">
+                <video id="video" autoplay></video>
+                <img id="capturedImage">
+                <div class="camera-status" id="cameraStatus">Camera Idle</div>
+            </div>
+            
+            <div class="camera-controls">
+                <button id="startCamera" class="action-btn btn-primary">Start</button>
+                <button id="capturePhoto" class="action-btn btn-success" disabled>Capture</button>
+                <button id="retakePhoto" class="action-btn btn-secondary" style="display: none;">Retake</button>
+                <button id="stopCamera" class="action-btn btn-secondary" disabled>Stop</button>
+            </div>
+        </div>
 
-    <!-- Fetching Message -->
-    <div id="fetchingMessage" class="fetching-message" style="display: none;">
-      Fetching details, please wait...
+        <!-- Upload Panel -->
+        <div class="panel">
+            <div class="panel-header">File Upload</div>
+            <div class="panel-subtitle">Upload document for automatic processing.</div>
+            
+            <!-- Auto-detection display -->
+            <div class="detected-type" id="detectedType">
+                <h3>Document Detected</h3>
+                <p id="detectedTypeName">Processing...</p>
+            </div>
+            
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Select Document</div>
+                <div class="upload-subtext">PNG, JPG, JPEG, PDF supported<br>Auto-detection enabled</div>
+                <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf">
+                <div id="fileSelected" class="file-selected" style="display: none;"></div>
+            </div>
+            
+            <div class="auto-process-indicator">
+                📋 Document type will be automatically detected and processed
+            </div>
+            
+            <button id="processButton" class="process-button" disabled>Process Document</button>
+        </div>
+
+        <!-- Details Panel -->
+        <div class="panel">
+            <div class="panel-header">Extracted Information</div>
+            <div class="panel-subtitle">Auto-populated based on detected document type.</div>
+
+            <!-- Aadhaar Form -->
+            <div id="aadhaarForm" class="details-form">
+                <div class="form-group">
+                    <label for="aadhaarName">Name</label>
+                    <input type="text" id="aadhaarName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="aadhaarDOB">Date of Birth</label>
+                    <input type="text" id="aadhaarDOB" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="aadhaarGender">Gender</label>
+                    <input type="text" id="aadhaarGender" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="aadhaarAddress">Address</label>
+                    <textarea id="aadhaarAddress" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="aadhaarNumber">Aadhaar Number</label>
+                    <input type="text" id="aadhaarNumber" readonly>
+                </div>
+            </div>
+
+            <!-- PAN Form -->
+            <div id="panForm" class="details-form">
+                <div class="form-group">
+                    <label for="panName">Name</label>
+                    <input type="text" id="panName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="panFatherName">Father's Name</label>
+                    <input type="text" id="panFatherName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="panDOB">Date of Birth</label>
+                    <input type="text" id="panDOB" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="panNumber">PAN Number</label>
+                    <input type="text" id="panNumber" readonly>
+                </div>
+            </div>
+
+            <!-- License Form -->
+            <div id="licenseForm" class="details-form">
+                <div class="form-group">
+                    <label for="licenseName">Name</label>
+                    <input type="text" id="licenseName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="licenseDOB">Date of Birth</label>
+                    <input type="text" id="licenseDOB" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="licenseAddress">Address</label>
+                    <textarea id="licenseAddress" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="licenseNumber">License Number</label>
+                    <input type="text" id="licenseNumber" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="licenseIssue">Issue Date</label>
+                    <input type="text" id="licenseIssue" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="licenseExpiry">Expiry Date</label>
+                    <input type="text" id="licenseExpiry" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="licenseClass">Vehicle Class</label>
+                    <input type="text" id="licenseClass" readonly>
+                </div>
+            </div>
+
+            <!-- Passport Form -->
+            <div id="passportForm" class="details-form">
+                <div class="form-group">
+                    <label for="passportName">Name</label>
+                    <input type="text" id="passportName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportDOB">Date of Birth</label>
+                    <input type="text" id="passportDOB" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportBirthPlace">Place of Birth</label>
+                    <input type="text" id="passportBirthPlace" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportNumber">Passport Number</label>
+                    <input type="text" id="passportNumber" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportIssue">Issue Date</label>
+                    <input type="text" id="passportIssue" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportExpiry">Expiry Date</label>
+                    <input type="text" id="passportExpiry" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportNationality">Nationality</label>
+                    <input type="text" id="passportNationality" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="passportGender">Gender</label>
+                    <input type="text" id="passportGender" readonly>
+                </div>
+            </div>
+
+            <div id="noDocumentSelected" style="text-align: center; color: #7f8c8d; padding: 40px 0;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <div>Upload or capture a document to begin automatic processing</div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="panel results-panel" id="resultsPanel" style="display: none;">
+            <div class="panel-header">Raw Extracted Data</div>
+            <div class="results-content">
+                <pre id="extractedData"></pre>
+            </div>
+        </div>
     </div>
 
-    <!-- Card Details -->
-    <div class="details" id="details" style="display: none;">
-      <h3>Card Details</h3>
-      <pre id="responseText"></pre>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div style="font-size: 16px; font-weight: 500; color: #2c3e50;">Processing... Please wait</div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    function updateFileName() {
-      const fileInput = document.getElementById('cardImage');
-      const label = document.querySelector('.file-upload label');
-      const fileName = fileInput.files[0]?.name || 'Choose a file';
-      label.textContent = fileName;  // Update label text with the file name
-    }
+    <canvas id="canvas"></canvas>
 
-    function uploadImage() {
-      var formData = new FormData();
-      var fileInput = document.getElementById('cardImage');
-      formData.append('file', fileInput.files[0]);
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const startCameraBtn = document.getElementById('startCamera');
+        const capturePhotoBtn = document.getElementById('capturePhoto');
+        const retakePhotoBtn = document.getElementById('retakePhoto');
+        const stopCameraBtn = document.getElementById('stopCamera');
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileSelected = document.getElementById('fileSelected');
+        const processButton = document.getElementById('processButton');
+        const resultsPanel = document.getElementById('resultsPanel');
+        const extractedData = document.getElementById('extractedData');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const noDocumentSelected = document.getElementById('noDocumentSelected');
 
-      // Show fetching message
-      document.getElementById('fetchingMessage').style.display = 'block';
-      document.getElementById('details').style.display = 'none'; // Hide previous details if any
+        let mediaStream = null;
+        let capturedBlob = null;
+        let detectedDocumentType = null;
 
-      fetch('/upload', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('fetchingMessage').style.display = 'none'; // Hide fetching message
-        document.getElementById('details').style.display = 'block'; // Show the details section
-        document.getElementById('responseText').innerText = data.details;  // Display the raw OpenAI response
-        document.getElementById('details').scrollTop = 0;
-        // Change button text to "Refresh"
-        document.getElementById('actionButton').textContent = 'Refresh';
-        document.getElementById('actionButton').setAttribute('onclick', 'refreshPage()');
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('fetchingMessage').style.display = 'none'; // Hide fetching message on error
-      });
-    }
+        // Modified process button update
+        function updateProcessButton() {
+            const hasInput = capturedBlob || fileInput.files[0];
+            
+            processButton.disabled = !hasInput;
+            
+            if (!hasInput) {
+                processButton.textContent = 'Select Document to Process';
+            } else {
+                processButton.textContent = 'Process & Auto-Detect';
+            }
+        }
 
-    function refreshPage() {
-      // Reset the UI elements to their initial state
-      document.getElementById('cardImage').value = ''; // Clear the file input
-      document.querySelector('.file-upload label').textContent = 'Choose a file'; // Reset file label
-      document.getElementById('responseText').innerText = ''; // Clear the response text
-      document.getElementById('details').style.display = 'none'; // Hide the details section
-      document.getElementById('fetchingMessage').style.display = 'none'; // Hide fetching message
-      document.getElementById('actionButton').textContent = 'Get Details'; // Change button text back to "Get Details"
-      document.getElementById('actionButton').setAttribute('onclick', 'uploadImage()'); // Reset the button action
-    }
-  </script>
+        // Modified file input handler
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileSelected.textContent = `Selected: ${file.name}`;
+                fileSelected.style.display = 'block';
+                uploadZone.classList.add('active');
+                
+                // Hide any previous detection
+                document.getElementById('detectedType').style.display = 'none';
+                
+                updateProcessButton();
+            } else {
+                fileSelected.style.display = 'none';
+                uploadZone.classList.remove('active');
+                updateProcessButton();
+            }
+        });
 
+        // Modified process function
+        async function processData(formData, endpoint) {
+            loadingOverlay.style.display = 'flex';
+            resultsPanel.style.display = 'none';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Display detected document type
+                    detectedDocumentType = result.document_type;
+                    if (detectedDocumentType && detectedDocumentType !== 'unknown') {
+                        const typeDisplay = document.getElementById('detectedType');
+                        const typeName = document.getElementById('detectedTypeName');
+                        
+                        typeName.textContent = formatDocumentTypeName(detectedDocumentType);
+                        typeDisplay.style.display = 'block';
+                        
+                        // Show corresponding form
+                        showDocumentForm(detectedDocumentType);
+                        
+                        // Fill form with extracted data
+                        fillFormWithExtractedData(result.details, detectedDocumentType);
+                    } else {
+                        alert('Could not automatically detect document type. Please ensure the document is clearly visible.');
+                    }
+                    
+                    // Show raw data
+                    extractedData.textContent = result.details;
+                    resultsPanel.style.display = 'block';
+                    
+                } else {
+                    extractedData.textContent = 'Error: ' + result.error;
+                    resultsPanel.style.display = 'block';
+                }
+            } catch (error) {
+                extractedData.textContent = 'Network Error: ' + error.message;
+                resultsPanel.style.display = 'block';
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Helper function to format document type names
+        function formatDocumentTypeName(type) {
+            const typeNames = {
+                'aadhaar': 'Aadhaar Card',
+                'pan': 'PAN Card',
+                'license': 'Driving License',
+                'passport': 'Passport'
+            };
+            return typeNames[type] || 'Unknown Document';
+        }
+
+        // Function to show appropriate form based on detected type
+        function showDocumentForm(docType) {
+            // Hide all forms first
+            document.querySelectorAll('.details-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Show the detected document form
+            const formId = docType + 'Form';
+            const targetForm = document.getElementById(formId);
+            if (targetForm) {
+                targetForm.style.display = 'block';
+                noDocumentSelected.style.display = 'none';
+            }
+        }
+
+        // Modified refresh function to include auto-detection reset
+        refreshBtn.addEventListener('click', () => {
+            // Stop camera if running
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+
+            // Reset camera UI
+            video.style.display = 'block';
+            capturedImage.style.display = 'none';
+            capturePhotoBtn.style.display = 'inline-block';
+            retakePhotoBtn.style.display = 'none';
+            
+            cameraStatus.textContent = 'Camera Idle';
+            cameraStatus.style.background = 'rgba(0, 0, 0, 0.7)';
+            
+            startCameraBtn.disabled = false;
+            capturePhotoBtn.disabled = true;
+            stopCameraBtn.disabled = true;
+
+            // Reset upload UI
+            fileInput.value = '';
+            fileSelected.style.display = 'none';
+            uploadZone.classList.remove('active');
+
+            // Reset auto-detection
+            detectedDocumentType = null;
+            document.getElementById('detectedType').style.display = 'none';
+
+            // Reset forms
+            document.querySelectorAll('.details-form').forEach(form => {
+                form.style.display = 'none';
+                const inputs = form.querySelectorAll('input, textarea');
+                inputs.forEach(input => input.value = '');
+            });
+            noDocumentSelected.style.display = 'block';
+
+            // Reset process button
+            processButton.disabled = true;
+            processButton.textContent = 'Select Document to Process';
+
+            // Hide results
+            resultsPanel.style.display = 'none';
+            extractedData.textContent = '';
+
+            // Hide loading
+            loadingOverlay.style.display = 'none';
+
+            // Reset captured blob
+            capturedBlob = null;
+
+            // Show confirmation
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<span class="refresh-icon">✓</span> Refreshed';
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+            }, 1000);
+        });
+
+        // Camera functionality
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'environment'
+                    }
+                });
+                video.srcObject = mediaStream;
+                cameraStatus.textContent = 'Camera Active';
+                cameraStatus.style.background = 'rgba(39, 174, 96, 0.8)';
+                
+                startCameraBtn.disabled = true;
+                capturePhotoBtn.disabled = false;
+                stopCameraBtn.disabled = false;
+            } catch (error) {
+                alert('Camera access denied: ' + error.message);
+            }
+        });
+
+        capturePhotoBtn.addEventListener('click', () => {
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+                capturedBlob = blob;
+                capturedImage.src = URL.createObjectURL(blob);
+                capturedImage.style.display = 'block';
+                video.style.display = 'none';
+                
+                cameraStatus.textContent = 'Photo Captured';
+                cameraStatus.style.background = 'rgba(52, 152, 219, 0.8)';
+                
+                capturePhotoBtn.style.display = 'none';
+                retakePhotoBtn.style.display = 'inline-block';
+                updateProcessButton();
+            }, 'image/jpeg', 0.9);
+        });
+
+        retakePhotoBtn.addEventListener('click', () => {
+            video.style.display = 'block';
+            capturedImage.style.display = 'none';
+            capturePhotoBtn.style.display = 'inline-block';
+            retakePhotoBtn.style.display = 'none';
+            
+            cameraStatus.textContent = 'Camera Active';
+            cameraStatus.style.background = 'rgba(39, 174, 96, 0.8)';
+            
+            capturedBlob = null;
+            updateProcessButton();
+        });
+
+        stopCameraBtn.addEventListener('click', () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            
+            video.style.display = 'block';
+            capturedImage.style.display = 'none';
+            capturePhotoBtn.style.display = 'inline-block';
+            retakePhotoBtn.style.display = 'none';
+            
+            cameraStatus.textContent = 'Camera Idle';
+            cameraStatus.style.background = 'rgba(0, 0, 0, 0.7)';
+            
+            startCameraBtn.disabled = false;
+            capturePhotoBtn.disabled = true;
+            stopCameraBtn.disabled = true;
+            
+            capturedBlob = null;
+            updateProcessButton();
+        });
+
+        // File upload functionality
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#3498db';
+            uploadZone.style.background = '#ebf8ff';
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = '#cbd5e0';
+            uploadZone.style.background = '#f7fafc';
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+            uploadZone.style.borderColor = '#cbd5e0';
+            uploadZone.style.background = '#f7fafc';
+        });
+
+        // Process button
+        processButton.addEventListener('click', async () => {
+            const formData = new FormData();
+            
+            if (capturedBlob) {
+                formData.append('camera_image', capturedBlob, 'capture.jpg');
+                await processData(formData, '/upload_camera');
+            } else if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+                await processData(formData, '/upload');
+            }
+        });
+
+        function fillFormWithExtractedData(data, docType) {
+            const lines = data.split('\n');
+            const extractedInfo = {};
+            
+            // Parse the extracted data
+            lines.forEach(line => {
+                if (line.includes(':')) {
+                    const [key, value] = line.split(':').map(s => s.trim());
+                    extractedInfo[key] = value;
+                }
+            });
+            
+            // Fill form based on document type
+            switch(docType) {
+                case 'aadhaar':
+                    document.getElementById('aadhaarName').value = extractedInfo['Name'] || '';
+                    document.getElementById('aadhaarDOB').value = extractedInfo['DOB'] || '';
+                    document.getElementById('aadhaarGender').value = extractedInfo['Gender'] || '';
+                    document.getElementById('aadhaarAddress').value = extractedInfo['Address'] || '';
+                    document.getElementById('aadhaarNumber').value = extractedInfo['Aadhaar Number'] || '';
+                    break;
+                case 'pan':
+                    document.getElementById('panName').value = extractedInfo['Name'] || '';
+                    document.getElementById('panFatherName').value = extractedInfo["Father's Name"] || '';
+                    document.getElementById('panDOB').value = extractedInfo['DOB'] || '';
+                    document.getElementById('panNumber').value = extractedInfo['PAN Number'] || '';
+                    break;
+                case 'license':
+                    document.getElementById('licenseName').value = extractedInfo['Name'] || '';
+                    document.getElementById('licenseDOB').value = extractedInfo['DOB'] || '';
+                    document.getElementById('licenseAddress').value = extractedInfo['Address'] || '';
+                    document.getElementById('licenseNumber').value = extractedInfo['License Number'] || '';
+                    document.getElementById('licenseIssue').value = extractedInfo['Issue Date'] || '';
+                    document.getElementById('licenseExpiry').value = extractedInfo['Expiry Date'] || '';
+                    document.getElementById('licenseClass').value = extractedInfo['Vehicle Class'] || '';
+                    break;
+                case 'passport':
+                    document.getElementById('passportName').value = extractedInfo['Name'] || '';
+                    document.getElementById('passportDOB').value = extractedInfo['DOB'] || '';
+                    document.getElementById('passportBirthPlace').value = extractedInfo['Place of Birth'] || '';
+                    document.getElementById('passportNumber').value = extractedInfo['Passport Number'] || '';
+                    document.getElementById('passportIssue').value = extractedInfo['Issue Date'] || '';
+                    document.getElementById('passportExpiry').value = extractedInfo['Expiry Date'] || '';
+                    document.getElementById('passportNationality').value = extractedInfo['Nationality'] || '';
+                    document.getElementById('passportGender').value = extractedInfo['Gender'] || '';
+                    break;
+            }
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
 </body>
 </html>
