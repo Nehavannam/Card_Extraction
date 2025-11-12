@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import easyocr
 import cv2
 import fitz  # PyMuPDF for handling PDFs
-from openai import AzureOpenAI #importing
+from openai import AzureOpenAI
 import os
 import io
 from PIL import Image
@@ -17,8 +17,54 @@ client = AzureOpenAI(
     azure_endpoint="https://icicipoc.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
 )
 
+# Function to automatically identify document type
+def identify_document_type(text_content):
+    combined_text = ' '.join(text_content).lower()
+    
+    # Define identification patterns for each document
+    document_patterns = {
+        'aadhaar': {
+            'keywords': ['aadhaar', 'aadhar', 'uidai', 'unique identification', 'government of india', 'भारत सरकार'],
+            'patterns': [r'\d{4}\s\d{4}\s\d{4}', r'\d{12}'],  # 12-digit pattern
+            'weight': 0
+        },
+        'pan': {
+            'keywords': ['permanent account number', 'pan', 'income tax department', 'govt of india'],
+            'patterns': [r'[A-Z]{5}[0-9]{4}[A-Z]{1}'],  # PAN format
+            'weight': 0
+        },
+        'license': {
+            'keywords': ['driving licence', 'driving license', 'dl no', 'transport', 'motor vehicle', 'rto', 'valid till'],
+            'patterns': [r'[A-Z]{2}[0-9]{2}[0-9]{11}', r'valid\s*till', r'valid\s*upto'],
+            'weight': 0
+        },
+        'passport': {
+            'keywords': ['passport', 'republic of india', 'type/type', 'passport no', 'place of birth', 'nationality'],
+            'patterns': [r'[A-Z][0-9]{7}', r'place\s*of\s*birth'],
+            'weight': 0
+        }
+    }
+    
+    # Calculate weights based on keyword and pattern matches
+    import re
+    for doc_type, criteria in document_patterns.items():
+        # Check keywords
+        for keyword in criteria['keywords']:
+            if keyword in combined_text:
+                criteria['weight'] += 1
+        
+        # Check patterns
+        for pattern in criteria['patterns']:
+            if re.search(pattern, ' '.join(text_content), re.IGNORECASE):
+                criteria['weight'] += 2
+    
+    # Find document type with highest weight
+    detected_type = max(document_patterns, key=lambda x: document_patterns[x]['weight'])
+    confidence = document_patterns[detected_type]['weight']
+    
+    return detected_type if confidence > 0 else 'unknown'
 
-# New route for handling camera captured images
+# Modified camera upload route
 @app.route('/upload_camera', methods=['POST'])
 def upload_camera():
     if 'camera_image' not in request.files:
@@ -51,10 +97,17 @@ def upload_camera():
             # Extract text from the camera image
             extracted_text = extract_text_from_image(temp_file_path)
             
+            # Auto-detect document type
+            document_type = identify_document_type(extracted_text)
+            
             # Get card details using OpenAI
             card_details = get_card_details(' '.join(extracted_text))
             
-            return jsonify({'details': card_details})
+            return jsonify({
+                'details': card_details,
+                'document_type': document_type,
+                'raw_text': extracted_text
+            })
             
         finally:
             # Clean up temporary file
@@ -63,7 +116,6 @@ def upload_camera():
                 
     except Exception as e:
         return jsonify({'error': f'Error processing camera image: {str(e)}'}), 500
-
 
 
 
@@ -259,16 +311,26 @@ def upload_file():
     if file_extension == 'pdf':
         # Extract text from the PDF
         extracted_text = extract_text_from_pdf(file_path)
+        text_list = extracted_text.split() if isinstance(extracted_text, str) else extracted_text
     elif file_extension in ['png', 'jpg', 'jpeg']:
         # Extract text from the image
-        extracted_text = extract_text_from_image(file_path)
+        text_list = extract_text_from_image(file_path)
     else:
         return jsonify({'error': 'Unsupported file type'}), 400
     
-    card_details = get_card_details(' '.join(extracted_text))
+    # Auto-detect document type
+    document_type = identify_document_type(text_list)
+    
+    # Get structured details
+    card_details = get_card_details(' '.join(text_list))
 
-    return jsonify({'details': card_details})
+    return jsonify({
+        'details': card_details,
+        'document_type': document_type,
+        'raw_text': text_list
+    })
+  
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
