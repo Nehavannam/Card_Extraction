@@ -63,4 +63,4 @@ jobs:
         with:
           app-name: 'adsai'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_180E96B116E84F3AB6C14B83491AFD0E }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_37AE3A4411D840E5858DAB03B36DEE83 }}
